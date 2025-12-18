@@ -17,7 +17,10 @@ export const Planet = ({ section, onClick, isActive, index }: PlanetProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
 
-  const baseSize = useMemo(() => (index === 0 ? 1.5 : 0.8 + index * 0.1), [index]);
+  const baseSize = useMemo(
+    () => (index === 0 ? 1.5 : 0.8 + index * 0.1),
+    [index]
+  );
 
   // Generate satellites for each planet
   const satellites = useMemo(() => {
@@ -36,7 +39,8 @@ export const Planet = ({ section, onClick, isActive, index }: PlanetProps) => {
     // Floating animation - apply to the whole group so satellites follow
     if (groupRef.current) {
       const time = state.clock.getElapsedTime();
-      groupRef.current.position.y = section.position[1] + Math.sin(time * 0.5 + index) * 0.2;
+      groupRef.current.position.y =
+        section.position[1] + Math.sin(time * 0.5 + index) * 0.2;
     }
 
     // Planet rotation
@@ -52,7 +56,11 @@ export const Planet = ({ section, onClick, isActive, index }: PlanetProps) => {
   return (
     <group
       ref={groupRef}
-      position={[section.position[0], section.position[1], section.position[2]]}>
+      position={[
+        section.position[0],
+        section.position[1],
+        section.position[2],
+      ]}>
       {/* Point light for bloom/glow effect */}
       <pointLight
         color={section.color}
@@ -119,7 +127,7 @@ export const Planet = ({ section, onClick, isActive, index }: PlanetProps) => {
           </p>
           {hovered && (
             <p className="text-xs text-muted-foreground mt-1 animate-fade-in">
-              Klicka för att utforska
+              Click to explore
             </p>
           )}
         </div>
