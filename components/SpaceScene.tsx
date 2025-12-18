@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, RefObject } from "react";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import {
@@ -28,7 +28,7 @@ const SceneContent = ({
   targetSection,
 }: SceneContentProps) => {
   const { camera } = useThree();
-  const controlsRef = useRef<any>(null);
+  const controlsRef = useRef(null);
   const isInteracting = useRef(false);
   const isLerping = useRef(false);
   const targetPosition = useRef(new THREE.Vector3(0, 2, 15));
@@ -78,6 +78,8 @@ const SceneContent = ({
       <PerspectiveCamera makeDefault position={[0, 2, 15]} fov={60} />
       <OrbitControls
         ref={controlsRef}
+        enableDamping={true}
+        dampingFactor={0.05}
         enableZoom={true}
         enablePan={true}
         enableRotate={true}

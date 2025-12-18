@@ -12,6 +12,22 @@ interface PlanetProps {
   index: number;
 }
 
+const generateSatellites = (index: number, baseSize: number, color: string) => {
+  if (index === 0) return [];
+  const count = 1 + (index % 3);
+  return Array.from({ length: count }, (_, i) => {
+    const pseudoRandom = Math.abs(Math.sin(index + i));
+
+    return {
+      orbitRadius: baseSize + 0.5 + i * 0.4,
+      speed: 0.5 + i * 0.3,
+      size: 0.05 + pseudoRandom * 0.03,
+      color: color,
+      offset: (i * Math.PI * 2) / count,
+    };
+  });
+};
+
 export const Planet = ({ section, onClick, isActive, index }: PlanetProps) => {
   const groupRef = useRef<THREE.Group>(null);
   const meshRef = useRef<THREE.Mesh>(null);
@@ -23,17 +39,10 @@ export const Planet = ({ section, onClick, isActive, index }: PlanetProps) => {
   );
 
   // Generate satellites for each planet
-  const satellites = useMemo(() => {
-    if (index === 0) return []; // No satellites for the sun
-    const count = 1 + (index % 3);
-    return Array.from({ length: count }, (_, i) => ({
-      orbitRadius: baseSize + 0.5 + i * 0.4,
-      speed: 0.5 + i * 0.3,
-      size: 0.05 + Math.random() * 0.03,
-      color: section.color,
-      offset: (i * Math.PI * 2) / count,
-    }));
-  }, [index, baseSize, section.color]);
+  const satellites = useMemo(
+    () => generateSatellites(index, baseSize, section.color),
+    [index, baseSize, section.color]
+  );
 
   useFrame((state) => {
     // Floating animation - apply to the whole group so satellites follow
