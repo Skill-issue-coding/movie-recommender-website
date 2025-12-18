@@ -15,6 +15,7 @@ import { Stars } from "./Stars";
 import { Asteroids } from "./Asteroids";
 import { SpaceStation } from "./SpaceStation";
 import { reportSections, ReportSection } from "@/data/reportContent";
+import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 
 interface SceneContentProps {
   onPlanetClick: (section: ReportSection) => void;
@@ -28,7 +29,7 @@ const SceneContent = ({
   targetSection,
 }: SceneContentProps) => {
   const { camera } = useThree();
-  const controlsRef = useRef(null);
+  const controlsRef = useRef<OrbitControlsImpl>(null);
   const isInteracting = useRef(false);
   const isLerping = useRef(false);
   const targetPosition = useRef(new THREE.Vector3(0, 2, 15));
