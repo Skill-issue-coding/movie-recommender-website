@@ -2,29 +2,31 @@ import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
+const generateAsteroids = (count: number) => {
+  const items = [];
+  for (let i = 0; i < count; i++) {
+    const angle = (i / count) * Math.PI * 2;
+    const radius = 18 + Math.random() * 8;
+    items.push({
+      position: [
+        Math.cos(angle) * radius,
+        (Math.random() - 0.5) * 4,
+        Math.sin(angle) * radius - 8,
+      ] as [number, number, number],
+      size: 0.05 + Math.random() * 0.15,
+      speed: 0.1 + Math.random() * 0.2,
+      rotationSpeed: Math.random() * 0.02,
+    });
+  }
+  return items;
+};
+
 export const Asteroids = () => {
   const groupRef = useRef<THREE.Group>(null);
 
-  const asteroids = useMemo(() => {
-    const items = [];
-    for (let i = 0; i < 40; i++) {
-      const angle = (i / 40) * Math.PI * 2;
-      const radius = 18 + Math.random() * 8;
-      items.push({
-        position: [
-          Math.cos(angle) * radius,
-          (Math.random() - 0.5) * 4,
-          Math.sin(angle) * radius - 8,
-        ] as [number, number, number],
-        size: 0.05 + Math.random() * 0.15,
-        speed: 0.1 + Math.random() * 0.2,
-        rotationSpeed: Math.random() * 0.02,
-      });
-    }
-    return items;
-  }, []);
+  const asteroids = useMemo(() => generateAsteroids(40), []);
 
-  useFrame((state) => {
+  useFrame(() => {
     if (groupRef.current) {
       groupRef.current.rotation.y += 0.0003;
     }
@@ -47,7 +49,12 @@ interface AsteroidRockProps {
   index: number;
 }
 
-const AsteroidRock = ({ position, size, rotationSpeed, index }: AsteroidRockProps) => {
+const AsteroidRock = ({
+  position,
+  size,
+  rotationSpeed,
+  index,
+}: AsteroidRockProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
@@ -57,7 +64,8 @@ const AsteroidRock = ({ position, size, rotationSpeed, index }: AsteroidRockProp
 
       // Subtle floating motion
       const time = state.clock.getElapsedTime();
-      meshRef.current.position.y = position[1] + Math.sin(time * 0.5 + index) * 0.1;
+      meshRef.current.position.y =
+        position[1] + Math.sin(time * 0.5 + index) * 0.1;
     }
   });
 

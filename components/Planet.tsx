@@ -12,31 +12,44 @@ interface PlanetProps {
   index: number;
 }
 
+const generateSatellites = (index: number, baseSize: number, color: string) => {
+  if (index === 0) return [];
+  const count = 1 + (index % 3);
+  return Array.from({ length: count }, (_, i) => {
+    const pseudoRandom = Math.abs(Math.sin(index + i));
+
+    return {
+      orbitRadius: baseSize + 0.5 + i * 0.4,
+      speed: 0.5 + i * 0.3,
+      size: 0.05 + pseudoRandom * 0.03,
+      color: color,
+      offset: (i * Math.PI * 2) / count,
+    };
+  });
+};
+
 export const Planet = ({ section, onClick, isActive, index }: PlanetProps) => {
   const groupRef = useRef<THREE.Group>(null);
   const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
 
-  const baseSize = useMemo(() => (index === 0 ? 1.5 : 0.8 + index * 0.1), [index]);
+  const baseSize = useMemo(
+    () => (index === 0 ? 1.5 : 0.8 + index * 0.1),
+    [index]
+  );
 
   // Generate satellites for each planet
-  const satellites = useMemo(() => {
-    if (index === 0) return []; // No satellites for the sun
-    const count = 1 + (index % 3);
-    return Array.from({ length: count }, (_, i) => ({
-      orbitRadius: baseSize + 0.5 + i * 0.4,
-      speed: 0.5 + i * 0.3,
-      size: 0.05 + Math.random() * 0.03,
-      color: section.color,
-      offset: (i * Math.PI * 2) / count,
-    }));
-  }, [index, baseSize, section.color]);
+  const satellites = useMemo(
+    () => generateSatellites(index, baseSize, section.color),
+    [index, baseSize, section.color]
+  );
 
   useFrame((state) => {
     // Floating animation - apply to the whole group so satellites follow
     if (groupRef.current) {
       const time = state.clock.getElapsedTime();
-      groupRef.current.position.y = section.position[1] + Math.sin(time * 0.5 + index) * 0.2;
+      groupRef.current.position.y =
+        section.position[1] + Math.sin(time * 0.5 + index) * 0.2;
     }
 
     // Planet rotation
@@ -52,7 +65,11 @@ export const Planet = ({ section, onClick, isActive, index }: PlanetProps) => {
   return (
     <group
       ref={groupRef}
-      position={[section.position[0], section.position[1], section.position[2]]}>
+      position={[
+        section.position[0],
+        section.position[1],
+        section.position[2],
+      ]}>
       {/* Point light for bloom/glow effect */}
       <pointLight
         color={section.color}
@@ -119,7 +136,7 @@ export const Planet = ({ section, onClick, isActive, index }: PlanetProps) => {
           </p>
           {hovered && (
             <p className="text-xs text-muted-foreground mt-1 animate-fade-in">
-              Klicka för att utforska
+              Click to explore
             </p>
           )}
         </div>

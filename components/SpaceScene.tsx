@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, RefObject } from "react";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import {
@@ -15,6 +15,7 @@ import { Stars } from "./Stars";
 import { Asteroids } from "./Asteroids";
 import { SpaceStation } from "./SpaceStation";
 import { reportSections, ReportSection } from "@/data/reportContent";
+import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 
 interface SceneContentProps {
   onPlanetClick: (section: ReportSection) => void;
@@ -22,9 +23,15 @@ interface SceneContentProps {
   targetSection: string | null;
 }
 
-const SceneContent = ({ onPlanetClick, activeSection, targetSection }: SceneContentProps) => {
+const SceneContent = ({
+  onPlanetClick,
+  activeSection,
+  targetSection,
+}: SceneContentProps) => {
   const { camera } = useThree();
-  const controlsRef = useRef<any>(null);
+  const controlsRef = useRef<OrbitControlsImpl>(null);
+  const isInteracting = useRef(false);
+  const isLerping = useRef(false);
   const targetPosition = useRef(new THREE.Vector3(0, 2, 15));
   const targetLookAt = useRef(new THREE.Vector3(0, 0, 0));
 
@@ -35,27 +42,45 @@ const SceneContent = ({ onPlanetClick, activeSection, targetSection }: SceneCont
         const [x, y, z] = section.position;
         targetPosition.current.set(x + 4, y + 2, z + 6);
         targetLookAt.current.set(x, y, z);
+        isLerping.current = true;
       }
     } else {
       targetPosition.current.set(0, 2, 15);
       targetLookAt.current.set(0, 0, 0);
+      isLerping.current = true;
     }
   }, [targetSection]);
 
   useFrame(() => {
-    camera.position.lerp(targetPosition.current, 0.02);
+    if (!isInteracting.current && isLerping.current) {
+      camera.position.lerp(targetPosition.current, 0.02);
 
-    if (controlsRef.current) {
-      controlsRef.current.target.lerp(targetLookAt.current, 0.02);
-      controlsRef.current.update();
+      if (controlsRef.current) {
+        controlsRef.current.target.lerp(targetLookAt.current, 0.02);
+        controlsRef.current.update();
+      }
+
+      if (camera.position.distanceTo(targetPosition.current) < 0.01) {
+        isLerping.current = false;
+      }
     }
   });
+
+  const handleTransform = () => {
+    if (controlsRef.current && isInteracting.current) {
+      isLerping.current = false;
+      targetPosition.current.copy(camera.position);
+      targetLookAt.current.copy(controlsRef.current.target);
+    }
+  };
 
   return (
     <>
       <PerspectiveCamera makeDefault position={[0, 2, 15]} fov={60} />
       <OrbitControls
         ref={controlsRef}
+        enableDamping={true}
+        dampingFactor={0.05}
         enableZoom={true}
         enablePan={true}
         enableRotate={true}
@@ -63,11 +88,24 @@ const SceneContent = ({ onPlanetClick, activeSection, targetSection }: SceneCont
         maxDistance={50}
         zoomSpeed={0.5}
         rotateSpeed={0.5}
+        onChange={handleTransform}
+        onStart={() => {
+          isInteracting.current = true;
+          isLerping.current = false;
+        }}
+        onEnd={() => {
+          isInteracting.current = false;
+        }}
       />
 
       {/* Lighting */}
       <ambientLight intensity={0.2} />
-      <pointLight position={[0, 0, 0]} intensity={2} color="#E8A838" distance={30} />
+      <pointLight
+        position={[0, 0, 0]}
+        intensity={2}
+        color="#E8A838"
+        distance={30}
+      />
       <pointLight position={[10, 5, -10]} intensity={0.8} color="#3B82F6" />
       <pointLight position={[-10, -5, -15]} intensity={0.8} color="#A855F7" />
 
@@ -115,7 +153,11 @@ const SceneContent = ({ onPlanetClick, activeSection, targetSection }: SceneCont
           radialModulation={false}
           modulationOffset={0}
         />
-        <Vignette offset={0.3} darkness={0.7} blendFunction={BlendFunction.NORMAL} />
+        <Vignette
+          offset={0.3}
+          darkness={0.7}
+          blendFunction={BlendFunction.NORMAL}
+        />
       </EffectComposer>
     </>
   );
@@ -127,12 +169,18 @@ interface SpaceSceneProps {
   targetSection: string | null;
 }
 
-export const SpaceScene = ({ onPlanetClick, activeSection, targetSection }: SpaceSceneProps) => {
+export const SpaceScene = ({
+  onPlanetClick,
+  activeSection,
+  targetSection,
+}: SpaceSceneProps) => {
   return (
     <div className="fixed inset-0 z-0">
       <Canvas
         gl={{ antialias: true, alpha: true }}
-        style={{ background: "linear-gradient(to bottom, #050510, #0a0a20, #0f0520)" }}>
+        style={{
+          background: "linear-gradient(to bottom, #050510, #0a0a20, #0f0520)",
+        }}>
         <SceneContent
           onPlanetClick={onPlanetClick}
           activeSection={activeSection}

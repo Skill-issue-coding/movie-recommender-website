@@ -12,7 +12,10 @@ export const ContentPanel = ({ section, onClose }: ContentPanelProps) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-background/60 backdrop-blur-md" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-background/60 backdrop-blur-md"
+        onClick={onClose}
+      />
 
       {/* Content */}
       <div
@@ -35,7 +38,10 @@ export const ContentPanel = ({ section, onClose }: ContentPanelProps) => {
           <div className="flex items-center gap-3 mb-2">
             <div
               className="w-4 h-4 rounded-full"
-              style={{ backgroundColor: section.color, boxShadow: `0 0 20px ${section.color}` }}
+              style={{
+                backgroundColor: section.color,
+                boxShadow: `0 0 20px ${section.color}`,
+              }}
             />
             <span className="text-sm text-muted-foreground font-medium uppercase tracking-wider">
               {section.subtitle}
@@ -73,7 +79,7 @@ export const ContentPanel = ({ section, onClose }: ContentPanelProps) => {
             onClick={onClose}
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="w-4 h-4" />
-            <span>Tillbaka till universumet</span>
+            <span>Back to the universe</span>
           </button>
         </div>
       </div>
